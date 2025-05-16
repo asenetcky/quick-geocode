@@ -1,11 +1,14 @@
 # section 1 ---------------------------------------------------------------
 
+# this whole thing is a little brittle - but its mostly for quick results
+# TODO: make this a bit safer
+# TODO: add file extension detection back
+
 memory <-
   succor::read_all_ext(
     path = fs::path_wd("data"),
     ext = "csv" # pick your file type
   )
-
 
 # section 2 ---------------------------------------------------------------
 
@@ -14,11 +17,11 @@ target <- purrr::pluck(memory, 1)
 
 output <-
   target |>
+  succor::rename_with_stringr() |>
   dplyr::rename_with(
     .cols = dplyr::everything(),
     .fn = \(x) {
       x |>
-        succor::rename_with_stringr() |>
         stringr::str_replace_all("\\s|/", "_") |>
         stringr::str_remove_all("\\d")
     }
