@@ -1,15 +1,37 @@
-# R Development Container
+# Geocode Template
 
-This is a development container template for basic R development projects for use with GitHub Codespaces.
 
-## Contents
+## Purpose
 
-This template comes with some placeholder files and folders to get projects up and started quickly.
+This is just a quick minimal R-based template for geocoding with the
+`tidygeocoder` package and the `census api`.
 
-- `R/` is for the main R source code.
-- `data/` is for raw data and inputs.
-- `output/` is for data products.
-- `quarto/` is for quarto projects.
+This honestly better as a small package - or better yet - functions
+inside of the internal `helpers` package. Alas, time is short.
 
-`renv` and all its related folders are initailized on container creation. An R-focused `.gitignore`
-is provided and everything is licensed under the MIT License.
+## Usage
+
+Until this is tidied up and formalized a little bit more, users can expect
+to do the following:
+
+
+
+1. Place their input datasets into `inputs/` 
+  - There is no need to hardcode any file paths.  The `read` function
+  will read all the files into memory- literally an R `list` called
+  `memory`.  Currently the following file types are read:
+    - .csv
+    - .tsv
+    - .xlsx and .xls
+    - .parquet
+    - and if none of the above it's going to take it's best
+    guess and scan for a delimeter
+    
+    
+2. Users will then head to `R/read-geo.R` and run the section 1 to have
+all files read into memory.
+
+3. Users can then go into section 2 and wrangle their code - see the commented
+out code for an example.
+
+4. Users can place outputs in `outputs/` 
