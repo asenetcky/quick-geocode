@@ -1,29 +1,9 @@
 # section 1 ---------------------------------------------------------------
 
-# generic read em all
-inputs <- fs::dir_ls(
-  fs::path_wd("data")
-)
-
-read <- function(path, ext) {
-  if (ext %in% c("xlsx", "xls")) {
-    readxl::read_excel(path)
-  } else if (ext == "csv") {
-    readr::read_csv(path)
-  } else if (ext == "tsv") {
-    readr::read_tsv(path)
-  } else if (ext == "parquet") {
-    nanoparquet::read_parquet(path)
-  } else {
-    readr::read_delim(path)
-  }
-}
-
 memory <-
-  purrr::map2(
-    .x = inputs,
-    .y = fs::path_ext(inputs),
-    \(x, y) read(x, y)
+  succor::read_all_ext(
+    path = fs::path_wd("data"),
+    ext = "csv" # pick your file type
   )
 
 
@@ -38,8 +18,7 @@ output <-
     .cols = dplyr::everything(),
     .fn = \(x) {
       x |>
-        stringr::str_squish() |>
-        stringr::str_to_lower() |>
+        succor::rename_with_stringr() |>
         stringr::str_replace_all("\\s|/", "_") |>
         stringr::str_remove_all("\\d")
     }
@@ -50,7 +29,10 @@ output <-
   )
 
 geos <-
-  tidygeocoder::geo(address = output$full_address, method = "census") |>
+  tidygeocoder::geo(
+    address = output$full_address,
+    method = "census"
+  ) |>
   dplyr::select(-address) |>
   dplyr::mutate(id = dplyr::row_number()) |>
   dplyr::rename(
