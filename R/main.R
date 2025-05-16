@@ -2,7 +2,7 @@
 
 # generic read em all
 inputs <- fs::dir_ls(
-  fs::path_wd("inputs")
+  fs::path_wd("data")
 )
 
 read <- function(path, ext) {
@@ -65,6 +65,6 @@ output <-
 
 readr::write_csv(
   output,
-  fs::path_wd("outputs", "geocoded", ext = "csv"),
+  fs::path_wd("output", "geocoded", ext = "csv"),
   na = ""
 )
