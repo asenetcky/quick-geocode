@@ -1,55 +1,59 @@
-# section 1 ---------------------------------------------------------------
+# geocode the files in `data/`
 
-# this whole thing is a little brittle - but its mostly for quick results
-# TODO: make this a bit safer
-# TODO: add file extension detection back
+## attempt to read files
+memory <- succor::read_folder(path = fs::path_wd("data"))
 
-memory <-
-  succor::read_all_ext(
-    path = fs::path_wd("data"),
-    ext = "csv" # pick your file type
-  )
-
-# section 2 ---------------------------------------------------------------
-
-# task specific
-target <- purrr::pluck(memory, 1)
-
+# task specific - but lets say for every tibble do...
 output <-
-  target |>
-  succor::rename_with_stringr() |>
-  dplyr::rename_with(
-    .cols = dplyr::everything(),
-    .fn = \(x) {
+  memory |>
+  purrr::map(
+    \(x) {
       x |>
-        stringr::str_replace_all("\\s|/", "_") |>
-        stringr::str_remove_all("\\d")
+        succor::rename_with_stringr() |>
+        dplyr::rename_with(
+          .cols = dplyr::everything(),
+          .fn = \(x) {
+            x |>
+              stringr::str_replace_all("\\s|/", "_") |>
+              stringr::str_remove_all("\\d")
+          }
+        ) |>
+        dplyr::mutate(
+          # right here will need the most TLC depending on data
+          full_address = glue::glue("{address}, {city}, {state} {zip}"),
+          id = dplyr::row_number()
+        )
     }
-  ) |>
-  dplyr::mutate(
-    full_address = glue::glue("{address}, {city}, CT {zip}"),
-    id = dplyr::row_number()
   )
 
-geos <-
-  tidygeocoder::geo(
-    address = output$full_address,
-    method = "census"
-  ) |>
-  dplyr::select(-address) |>
-  dplyr::mutate(id = dplyr::row_number()) |>
-  dplyr::rename(
-    census_lat = lat,
-    census_long = long
-  )
-
-output <-
+## geocode with census api
+geocoded_output <-
   output |>
-  dplyr::inner_join(geos, by = c("id")) |>
-  dplyr::select(-id)
+  purrr::map(
+    \(x) {
+      geo <-
+        tidygeocoder::geo(
+          address = x$full_address,
+          method = "census"
+        ) |>
+        dplyr::select(-address) |> #address var is returned by api
+        dplyr::mutate(id = dplyr::row_number()) |>
+        dplyr::rename(
+          census_lat = lat,
+          census_long = long
+        )
+      x |>
+        dplyr::inner_join(geo, by = "id") |>
+        dplyr::select(-id)
+    }
+  )
 
-readr::write_csv(
-  output,
-  fs::path_wd("output", "geocoded", ext = "csv"),
-  na = ""
-)
+# write results to `data/`
+geocoded_output |>
+  purrr::imap(
+    \(x, idx) {
+      # don't clobber original file
+      name <- glue::glue("{fs::path_ext_remove(idx)}-geocoded.csv")
+      readr::write_csv(x, name, na = "")
+    }
+  )
