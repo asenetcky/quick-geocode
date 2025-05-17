@@ -25,10 +25,6 @@ to do the following:
     - and if none of the above it's going to take it's best
     guess and scan for a delimeter
     
-2. Users will then head to `R/read-geo.R` and run the section 1 to have
-all files read into memory.
+2. Users will then source `R/main.R`.
 
-3. Users can then go into section 2 and wrangle their code - see the commented
-out code for an example.
-
-4. Users can place outputs in `outputs/` 
+3. Geocoded results will appear in `output/`.
