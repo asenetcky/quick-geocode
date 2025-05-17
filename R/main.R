@@ -53,7 +53,9 @@ geocoded_output |>
   purrr::imap(
     \(x, idx) {
       # don't clobber original file
-      name <- glue::glue("{fs::path_ext_remove(idx)}-geocoded.csv")
+      name <-
+        glue::glue("{fs::path_ext_remove(idx)}-geocoded.csv") |>
+        stringr::str_replace("data/", "output/")
       readr::write_csv(x, name, na = "")
     }
   )
