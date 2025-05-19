@@ -5,9 +5,6 @@
 This is just a quick minimal R-based template for geocoding with the
 `tidygeocoder` package and the `census api`.
 
-This honestly better as a small package - or better yet - functions
-inside of the internal `helpers` package. Alas, time is short.
-
 ## Usage
 
 Until this is tidied up and formalized a little bit more, users can expect
